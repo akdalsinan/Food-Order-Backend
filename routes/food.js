@@ -2,11 +2,18 @@ var express = require("express");
 var router = express.Router();
 var client = require("../config/db");
 
+// Veritabanı bağlantısını yalnızca bir kez açın
+client.connect(function (err) {
+  if (err) {
+    console.error("Veritabanına bağlanırken hata oluştu:", err);
+  } else {
+    console.log("Veritabanına başarıyla bağlandı.");
+  }
+})
+
 router.get("/food", function (req, res) {
   res.send("respond with a resource");
-});
-
-client.connect();
+})
 
 router.get("/getAllFood", function (req, res) {
   client.query("Select * from types", (err, result) => {
@@ -15,40 +22,37 @@ router.get("/getAllFood", function (req, res) {
     } else {
       res.send(err.message);
     }
-    client.end;
-  });
+  })
 });
+
 router.get("/getAllPizza", function (req, res) {
-  client.query("Select * from types where foodid=(1)", (err, result) => {
+  client.query("Select * from types where foodid=1", (err, result) => {
     if (!err) {
       res.send(result.rows);
     } else {
       res.send(err.message);
     }
-    client.end;
-  });
+  })
 });
 
 router.get("/getAllHamburger", function (req, res) {
-  client.query("Select * from types where foodid=(2)", (err, result) => {
+  client.query("Select * from types where foodid=2", (err, result) => {
     if (!err) {
       res.send(result.rows);
     } else {
       res.send(err.message);
     }
-    client.end;
-  });
+  })
 });
 
 router.get("/getAllMakarna", function (req, res) {
-  client.query("Select * from types where foodid=(3)", (err, result) => {
+  client.query("Select * from types where foodid=3", (err, result) => {
     if (!err) {
       res.send(result.rows);
     } else {
       res.send(err.message);
     }
-    client.end;
-  });
+  })
 });
 
 // -------------yemek ekleme servisi-------------------//
@@ -62,29 +66,26 @@ router.post("/addFood", function (req, res) {
   } else if (food.foodid === "makarna") {
     foodid = 3;
   }
-  let insertQuery = `insert into types(typesname,foodid) values ('${food.typesname}','${foodid}')`;
+  let insertQuery = `insert into types(typesname,foodid,price) values ('${food.typesname}','${foodid}','${food.price}')`;
   client.query(insertQuery, (err, result) => {
     if (!err) {
-      res.send("asdasdsa");
+      res.send("Ekleme başarılı");
     } else {
       res.send(err.message);
     }
-    client.end;
-  });
+  })
 });
 
 // -------------yemek silme servisi-------------------//
-
 router.post("/foodDelete", function (req, res) {
-  let insertQuery = `delete from types where id=${req.body.id}`;
-  client.query(insertQuery, (err, result) => {
+  let deleteQuery = `delete from types where id=${req.body.id}`;
+  client.query(deleteQuery, (err, result) => {
     if (!err) {
-      res.send("silme başarılı");
+      res.send("Silme başarılı");
     } else {
       res.send(err.message);
     }
-    client.end;
-  });
+  })
 });
 
 module.exports = router;
