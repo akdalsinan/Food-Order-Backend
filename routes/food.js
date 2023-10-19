@@ -55,7 +55,8 @@ router.get("/getAllMakarna", function (req, res) {
   })
 });
 
-// -------------yemek ekleme servisi-------------------//
+// -------------food add apı-------------------//
+
 router.post("/addFood", function (req, res) {
   const food = req.body;
   let foodid;
@@ -76,7 +77,8 @@ router.post("/addFood", function (req, res) {
   })
 });
 
-// -------------yemek silme servisi-------------------//
+// -------------food delete apı------------------- //
+
 router.post("/foodDelete", function (req, res) {
   let deleteQuery = `delete from types where id=${req.body.id}`;
   client.query(deleteQuery, (err, result) => {

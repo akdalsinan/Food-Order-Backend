@@ -4,8 +4,9 @@ const cors = require("cors");
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-// var client = require("../config/db");
+// import dotenv from 'dotenv'
 
+// dotenv.config();
 var app = express();
 
 app.use(cors());

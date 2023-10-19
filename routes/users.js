@@ -1,8 +1,11 @@
 var express = require("express");
 var router = express.Router();
 var client = require("../config/db");
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
 
-/* GET users listing. */
+dotenv.config();
+
 router.get("/users", function (req, res, next) {
   res.send("respond sadasdasd a resource");
 });
@@ -22,9 +25,44 @@ router.get("/getAllUsers", function (req, res) {
     } else {
       res.send(err.message);
     }
-
-  })
+  });
 });
+
+// ------------- user login apı -------------------//
+
+router.post("/loginUser", function (req, res) {
+  const email = req.body.email;
+  const password = req.body.password;
+  client.query(
+    "SELECT * FROM users WHERE email = $1",
+    [email],
+    (err, result) => {
+      if (!err) {
+        if (result.rows.length === 1) {
+          const storedUser = result.rows[0];
+
+          const accessToken = jwt.sign(
+            { email: storedUser.email, adress: storedUser.adress , nameSSurname:storedUser.namesurname},
+            process.env.ACCESS_TOKEN_SECRET,
+            { expiresIn: "5m" }
+          );
+
+          if (password === storedUser.password) {
+            return res.status(200).json({token:accessToken,message:"Giris basarili"});
+          } else {
+            res.send("Hatalı şifre");
+          }
+        } else {
+          res.send("Kullanıcı bulunamadı");
+        }
+      } else {
+        res.status(500).send(err.message);
+      }
+    }
+  );
+});
+
+// -------------user add apı-------------------//
 
 router.post("/addUser", function (req, res) {
   const user = req.body;
@@ -35,9 +73,10 @@ router.post("/addUser", function (req, res) {
     } else {
       res.send(err.message);
     }
-
-  })
+  });
 });
+
+// -------------user delete apı-------------------//
 
 router.post("/userDelete", function (req, res) {
   let deleteQuery = `delete from users where id=${req.body.id}`;
@@ -49,6 +88,5 @@ router.post("/userDelete", function (req, res) {
     }
   });
 });
-
 
 module.exports = router;
