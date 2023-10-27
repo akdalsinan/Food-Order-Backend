@@ -3,6 +3,7 @@ var router = express.Router();
 var client = require("../config/db");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const { authMiddleware } = require("../middlewares/authMiddleware.js");
 
 dotenv.config();
 
@@ -30,6 +31,14 @@ router.get("/getAllUsers", function (req, res) {
 
 // ------------- user login apı -------------------//
 
+router.get("/profile", authMiddleware, async (req, res) => {
+  try {
+    res.send(req.user);
+  } catch (err) {
+     return res.status(200).json({ message: "token süresi doldu" });
+  }
+});
+
 router.post("/loginUser", function (req, res) {
   const email = req.body.email;
   const password = req.body.password;
@@ -42,13 +51,20 @@ router.post("/loginUser", function (req, res) {
           const storedUser = result.rows[0];
 
           const accessToken = jwt.sign(
-            { email: storedUser.email, adress: storedUser.adress , nameSSurname:storedUser.namesurname},
+            {
+              email: storedUser.email,
+              adress: storedUser.adress,
+              nameSSurname: storedUser.namesurname,
+            },
             process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: "5m" }
+            { expiresIn: "1m" }
           );
 
           if (password === storedUser.password) {
-            return res.status(200).json({token:accessToken,message:"Giris basarili"});
+            return res.status(200).json({
+              accessToken: accessToken,
+              message: "Giris basarili",
+            });
           } else {
             res.send("Hatalı şifre");
           }
